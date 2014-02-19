@@ -26,7 +26,6 @@ if(!empty($stops)) {
         $nextbus_predictions = get_predictions_from_nextbus($route_config, $stops);
         // build the message.
         $message = "";
-        $message .= $stops[0]."\n";
         foreach($nextbus_predictions as $stop => $times)
         {
             //only pick the first three times.
@@ -35,6 +34,12 @@ if(!empty($stops)) {
             {
                 $message .= "$stop ".implode(' ', $times). "\n";
             }
+        }
+
+        // prepend the title only if we have room
+        if(strlen($message) + strlen($stops[0]) <= 160)
+        {
+            $message = $stops[0]."\n".$message;
         }
     } catch (Exception $e) {
         $message = "RUBUS is temporarily unavailable. Please try again.\n";
