@@ -38,20 +38,24 @@ if(!empty($stops)) {
 
         // finally, split the message up into parts
         $message_arr = array();
-        if(strlen($message) < 160)
+        $limit = 160;
+        if(strlen($message) < $limit)
         {
             $message_arr[0] = $message;
         }
         else
         {
-            $count = 0;
-            while(strlen($message) > 160)
+            while(strlen($message) > $limit)
             {
-                $pos = 0;
-                for($next = 0; $next < 160; $pos = $next, $next = strstr($message, $pos));
-                $message_arr[$count] = $message.substr(0, $pos);
-                $message = $message.substr($pos + 1);
+                $index = strrlpos($message, "\n", $limit);
+                if($index < 0)
+                {
+                    $index = $limit;
+                }
+                $message_arr[] = substr($message, 0 , $index);
+                $message = substr($message, $index+1);
             }
+            $message_arr[] = $message;
         }
     } catch (Exception $e) {
         $message = "RUBUS is temporarily unavailable. Please try again.\n";
@@ -63,11 +67,9 @@ if(!empty($stops)) {
     $message .= "More info: http://rubus.rutgers.edu\n";
 }
 
-$count = 1;
+echo "<Response>\n";
 foreach($message_arr as $val)
 {
-    echo "Chunk #$count:\n";
-    echo $val;
-    echo strlen($val)."\n";
-    $count = $count + 1;
+    echo "<Message>\n$val\n".strlen($val)."\n</Message>\n\n";
 }
+echo "</Response>\n";

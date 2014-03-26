@@ -56,41 +56,6 @@ function help()
     return $message;
 }
 
-// Splits a long message into parts into an array.
-function split($message, $limit, $delimeter)
-{
-    $result = array();
-    if(strlen($message) < $limit)
-    {
-        $result[] = $message;
-        return $result;
-    }
-
-    // Break the message up into smaller chunks
-    while(strlen($message) > 0)
-    {
-        $index = -1;
-        do
-        {
-            $index = strpos($message, $delimeter, $index+1);
-            if($index === false)
-            {
-                if(strlen($message) > $limit)
-                {
-                    $result[] = substr($message, 0, $index);
-                    $result[] = substr($message, $index+1);
-                }
-                else
-                    $result[] = $message;
-                return $result;
-            }
-        }
-        while($index < $limit);
-        $result[] = substr($message, 0, $index);
-        $result[] = substr($message, $index+1);
-    }
-}
-
 logger('info', $_SERVER['REQUEST_URI']);
 
 $abbreviations = json_decode(file_get_contents('abbreviations.json'), true);
@@ -126,6 +91,28 @@ else
                     $message .= "$stop ".implode(' ', $times). "\n";
                 }
             }
+
+            // finally, split the message up into parts
+            $message_arr = array();
+            $limit = 160;
+            if(strlen($message) < $limit)
+            {
+                $message_arr[0] = $message;
+            }
+            else
+            {
+                while(strlen($message) > $limit)
+                {
+                    $index = strrlpos($message, "\n", $limit);
+                    if($index < 0)
+                    {
+                        $index = $limit;
+                    }
+                    $message_arr[] = substr($message, 0 , $index);
+                    $message = substr($message, $index+1);
+                }
+                $message_arr[] = $message;
+            }
         }
         else {
             $message = help();
@@ -138,5 +125,10 @@ else
 }
 ?>
 <Response>
-    <Sms> <?php echo $message; ?> </Sms>
+<?php
+    foreach($message_arr as $sms)
+    {
+        echo "<Sms>$sms</Sms>\n";
+    }
+?>
 </Response>
