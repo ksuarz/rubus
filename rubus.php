@@ -25,21 +25,33 @@ if(!empty($stops)) {
     try {
         $nextbus_predictions = get_predictions_from_nextbus($route_config, $stops);
         // build the message.
-        $message = "";
+        $message = $stops[0]."\n";
         foreach($nextbus_predictions as $stop => $times)
         {
             //only pick the first three times.
             $times = array_splice($times, 0, 3);
             if(!empty($times))
             {
-                $message .= "$stop ".implode(' ', $times). "\n";
+                $message .= "$stop ".implode(' ', $times)."\n";
             }
         }
 
-        // prepend the title only if we have room
-        if(strlen($message) + strlen($stops[0]) <= 160)
+        // finally, split the message up into parts
+        $message_arr = array();
+        if(strlen($message) < 160)
         {
-            $message = $stops[0]."\n".$message;
+            $message_arr[0] = $message;
+        }
+        else
+        {
+            $count = 0;
+            while(strlen($message) > 160)
+            {
+                $pos = 0;
+                for($next = 0; $next < 160; $pos = $next, $next = strstr($message, $pos));
+                $message_arr[$count] = $message.substr(0, $pos);
+                $message = $message.substr($pos + 1);
+            }
         }
     } catch (Exception $e) {
         $message = "RUBUS is temporarily unavailable. Please try again.\n";
@@ -51,5 +63,11 @@ if(!empty($stops)) {
     $message .= "More info: http://rubus.rutgers.edu\n";
 }
 
-echo $message;
-echo strlen($message)."\n";
+$count = 1;
+foreach($message_arr as $val)
+{
+    echo "Chunk #$count:\n";
+    echo $val;
+    echo strlen($val)."\n";
+    $count = $count + 1;
+}

@@ -56,6 +56,41 @@ function help()
     return $message;
 }
 
+// Splits a long message into parts into an array.
+function split($message, $limit, $delimeter)
+{
+    $result = array();
+    if(strlen($message) < $limit)
+    {
+        $result[] = $message;
+        return $result;
+    }
+
+    // Break the message up into smaller chunks
+    while(strlen($message) > 0)
+    {
+        $index = -1;
+        do
+        {
+            $index = strpos($message, $delimeter, $index+1);
+            if($index === false)
+            {
+                if(strlen($message) > $limit)
+                {
+                    $result[] = substr($message, 0, $index);
+                    $result[] = substr($message, $index+1);
+                }
+                else
+                    $result[] = $message;
+                return $result;
+            }
+        }
+        while($index < $limit);
+        $result[] = substr($message, 0, $index);
+        $result[] = substr($message, $index+1);
+    }
+}
+
 logger('info', $_SERVER['REQUEST_URI']);
 
 $abbreviations = json_decode(file_get_contents('abbreviations.json'), true);

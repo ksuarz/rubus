@@ -178,6 +178,33 @@ function strip_start($haystack, $needle){
     return $haystack;
 }
 
+/** Like strrpos, this finds the last location of $needle in $haystack but only 
+ * checks up to index $limit, exclusive. If none is found within $limit, this 
+ * returns -1. If $limit at least the length of $haystack, this has identical 
+ * behavior to strpos.
+ */
+function strrlpos($haystack, $needle, $limit) {
+    // Sanity check
+    $limit = min($limit, strlen($haystack));
+    if($limit < 0)
+        return -1;
+
+    $index = -1;
+    $next = -1;
+    do
+    {
+        $index = $next;
+        $next = strpos($haystack, $needle, $index+1);
+        if($next === false)
+            break;
+    }
+    while($next < $limit);
+
+    if($index <= $limit)
+        return $index;
+    else
+        return -1;
+}
 
 /** Returns a short version of the name of a direction.
  * short_direction_name('To Rutgers Student Center') => 'TO RSC'
